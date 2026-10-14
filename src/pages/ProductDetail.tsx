@@ -61,14 +61,12 @@ export default function ProductDetail() {
     enabled: !!product?.category_slug,
   })
 
-  function handleAddToCart() {
+  function addToCart() {
     if (!product) return
-
     if (product.sizes.length > 0 && !selectedSize) {
       alert('Please select a size')
-      return
+      return false
     }
-
     addItem(
       {
         id: product.id,
@@ -81,9 +79,19 @@ export default function ProductDetail() {
       },
       { size: selectedSize, color: selectedColor, quantity },
     )
+    return true
+  }
 
-    setAdded(true)
-    setTimeout(() => setAdded(false), 2000)
+  function handleAddToCart() {
+    if (!product) return
+    if (addToCart()) {
+      setAdded(true)
+      setTimeout(() => setAdded(false), 2000)
+    }
+  }
+
+  function handleBuyNow() {
+    if (addToCart()) navigate('/checkout')
   }
 
   async function handleShare() {
@@ -291,6 +299,7 @@ export default function ProductDetail() {
 
                 <Button
                   onClick={handleAddToCart}
+                  variant="secondary"
                   className="flex-1"
                   disabled={added}
                 >
@@ -298,6 +307,16 @@ export default function ProductDetail() {
                   {added ? 'Added!' : 'Add to Cart'}
                 </Button>
               </div>
+            )}
+
+            {inStock && (
+              <button
+                type="button"
+                onClick={handleBuyNow}
+                className="w-full py-3 bg-burgundy-700 hover:bg-burgundy-800 text-white font-semibold rounded-xl transition-colors text-sm tracking-wide"
+              >
+                Buy Now
+              </button>
             )}
 
             {/* WhatsApp enquiry */}
