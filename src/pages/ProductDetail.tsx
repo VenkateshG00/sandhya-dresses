@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { ShoppingBag, Share2, Minus, Plus } from 'lucide-react'
-import { fetchProduct, fetchProducts } from '@/lib/api'
+import { useParams, useNavigate } from 'react-router-dom'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { ShoppingBag, Share2, Minus, Plus, Heart } from 'lucide-react'
+import { fetchProduct, fetchProducts, customerGetWishlist, customerAddToWishlist, customerRemoveFromWishlist } from '@/lib/api'
 import { useCartStore, formatPrice } from '@/lib/cart'
+import { useCustomerStore } from '@/lib/customerStore'
 import ProductGallery from '@/components/product/ProductGallery'
 import SizeChart from '@/components/product/SizeChart'
 import ReturnPolicySnippet from '@/components/product/ReturnPolicySnippet'
@@ -22,6 +23,30 @@ export default function ProductDetail() {
   const [added, setAdded] = useState(false)
 
   const addItem = useCartStore((s) => s.addItem)
+  const { isLoggedIn } = useCustomerStore()
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  const { data: wishlist = [] } = useQuery({
+    queryKey: ['customer-wishlist'],
+    queryFn: customerGetWishlist,
+    enabled: isLoggedIn(),
+  })
+
+  const wishlisted = wishlist.some((w) => w.product_id === product?.id)
+
+  const wishlistMutation = useMutation({
+    mutationFn: () =>
+      wishlisted
+        ? customerRemoveFromWishlist(product!.id)
+        : customerAddToWishlist(product!.id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['customer-wishlist'] }),
+  })
+
+  function handleWishlist() {
+    if (!isLoggedIn()) { navigate('/login'); return }
+    wishlistMutation.mutate()
+  }
 
   const { data: product, isLoading, isError, refetch } = useQuery({
     queryKey: ['product', slug],
@@ -123,14 +148,27 @@ export default function ProductDetail() {
               <h1 className="font-serif text-2xl lg:text-display-sm text-charcoal-900 leading-snug">
                 {product.name}
               </h1>
-              <button
-                type="button"
-                onClick={() => void handleShare()}
-                aria-label="Share this product"
-                className="btn-ghost p-2 rounded-full shrink-0"
-              >
-                <Share2 className="w-5 h-5" aria-hidden />
-              </button>
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleWishlist}
+                  aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                  className="btn-ghost p-2 rounded-full"
+                >
+                  <Heart
+                    className={`w-5 h-5 transition-colors ${wishlisted ? 'text-red-500 fill-red-500' : ''}`}
+                    aria-hidden
+                  />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleShare()}
+                  aria-label="Share this product"
+                  className="btn-ghost p-2 rounded-full"
+                >
+                  <Share2 className="w-5 h-5" aria-hidden />
+                </button>
+              </div>
             </div>
 
             {/* Price */}

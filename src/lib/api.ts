@@ -5,6 +5,10 @@ import type {
   SiteConfig,
   CreateOrderResponse,
   Order,
+  Customer,
+  CustomerAddress,
+  WishlistItem,
+  AuthResponse,
 } from '@/types'
 
 const BASE = '/api'
@@ -264,4 +268,109 @@ export function imageUrl(r2Key: string): string {
   if (!r2Key) return '/placeholder-product.svg'
   if (r2Key.startsWith('http')) return r2Key
   return `/api/images/${r2Key}`
+}
+
+// ── Auth (customer + admin unified) ──────────────────────────────────────────
+
+export async function authRegister(data: {
+  name: string
+  email: string
+  password: string
+  phone?: string | undefined
+}): Promise<AuthResponse> {
+  return request<AuthResponse>('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function authLogin(data: {
+  email: string
+  password: string
+}): Promise<AuthResponse> {
+  return request<AuthResponse>('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function authLogout(): Promise<void> {
+  await request('/auth/logout', { method: 'POST' })
+}
+
+export async function authMe(): Promise<{ authenticated: boolean; customer?: Customer | undefined }> {
+  try {
+    return await request<{ authenticated: boolean; customer?: Customer | undefined }>('/auth/me')
+  } catch {
+    return { authenticated: false }
+  }
+}
+
+// ── Customer account ──────────────────────────────────────────────────────────
+
+export async function customerGetProfile(): Promise<Customer> {
+  return request<Customer>('/customer/profile')
+}
+
+export async function customerUpdateProfile(data: { name?: string; phone?: string }): Promise<void> {
+  await request('/customer/profile', { method: 'PUT', body: JSON.stringify(data) })
+}
+
+export async function customerChangePassword(data: {
+  current_password: string
+  new_password: string
+}): Promise<void> {
+  await request('/customer/password', { method: 'PUT', body: JSON.stringify(data) })
+}
+
+export interface CustomerOrderSummary {
+  id: number
+  order_number: string
+  total: number
+  payment_method: string
+  payment_status: string
+  order_status: string
+  created_at: string
+}
+
+export async function customerGetOrders(): Promise<CustomerOrderSummary[]> {
+  return request<CustomerOrderSummary[]>('/customer/orders')
+}
+
+export async function customerGetOrder(orderId: number): Promise<Order> {
+  return request<Order>(`/customer/orders/${orderId}`)
+}
+
+export async function customerGetAddresses(): Promise<CustomerAddress[]> {
+  return request<CustomerAddress[]>('/customer/addresses')
+}
+
+export async function customerAddAddress(data: Omit<CustomerAddress, 'id' | 'customer_id' | 'created_at'>): Promise<{ id: number }> {
+  return request<{ id: number }>('/customer/addresses', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function customerUpdateAddress(id: number, data: Omit<CustomerAddress, 'id' | 'customer_id' | 'created_at'>): Promise<void> {
+  await request(`/customer/addresses/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function customerDeleteAddress(id: number): Promise<void> {
+  await request(`/customer/addresses/${id}`, { method: 'DELETE' })
+}
+
+export async function customerGetWishlist(): Promise<WishlistItem[]> {
+  return request<WishlistItem[]>('/customer/wishlist')
+}
+
+export async function customerAddToWishlist(productId: number): Promise<void> {
+  await request(`/customer/wishlist/${productId}`, { method: 'POST' })
+}
+
+export async function customerRemoveFromWishlist(productId: number): Promise<void> {
+  await request(`/customer/wishlist/${productId}`, { method: 'DELETE' })
 }

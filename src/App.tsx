@@ -22,13 +22,24 @@ const Terms = lazy(() => import('@/pages/legal/Terms'))
 const Returns = lazy(() => import('@/pages/legal/Returns'))
 
 // Admin pages
-const AdminLogin = lazy(() => import('@/pages/admin/Login'))
 const AdminLayout = lazy(() => import('@/components/admin/AdminLayout'))
 const AdminDashboard = lazy(() => import('@/pages/admin/Dashboard'))
 const AdminProducts = lazy(() => import('@/pages/admin/Products'))
 const AdminProductEdit = lazy(() => import('@/pages/admin/ProductEdit'))
 const AdminOrders = lazy(() => import('@/pages/admin/Orders'))
 const AdminSettings = lazy(() => import('@/pages/admin/Settings'))
+
+// Auth + Account pages
+const LoginPage = lazy(() => import('@/pages/Login'))
+const AccountLayout = lazy(() =>
+  import('@/components/account/AccountLayout').then((m) => ({ default: m.AccountLayout })),
+)
+const AccountOrders = lazy(() => import('@/pages/account/Orders'))
+const AccountOrderDetail = lazy(() => import('@/pages/account/OrderDetail'))
+const AccountProfile = lazy(() => import('@/pages/account/Profile'))
+const AccountAddress = lazy(() => import('@/pages/account/Address'))
+const AccountWishlist = lazy(() => import('@/pages/account/Wishlist'))
+const AccountPassword = lazy(() => import('@/pages/account/Password'))
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -157,8 +168,22 @@ export default function App() {
             }
           />
 
+          {/* Unified login */}
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* Customer account */}
+          <Route path="/account" element={<AccountLayout />}>
+            <Route index element={<Navigate to="/account/orders" replace />} />
+            <Route path="orders" element={<AccountOrders />} />
+            <Route path="orders/:orderId" element={<AccountOrderDetail />} />
+            <Route path="profile" element={<AccountProfile />} />
+            <Route path="address" element={<AccountAddress />} />
+            <Route path="wishlist" element={<AccountWishlist />} />
+            <Route path="password" element={<AccountPassword />} />
+          </Route>
+
           {/* Admin */}
-          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin" element={<Navigate to="/login" replace />} />
           <Route path="/admin/*" element={<AdminLayout />}>
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { ShoppingBag, Menu, Search, X } from 'lucide-react'
+import { ShoppingBag, Menu, Search, X, User } from 'lucide-react'
 import { useCartStore } from '@/lib/cart'
 import { useSiteConfig } from '@/lib/config'
+import { useCustomerStore } from '@/lib/customerStore'
 import MobileNav from './MobileNav'
 import CartDrawer from '@/components/cart/CartDrawer'
 
@@ -33,6 +34,7 @@ export default function Header() {
   }, [])
 
   const isTransparent = location.pathname === '/' && !scrolled && !mobileOpen
+  const { isLoggedIn, isAdmin } = useCustomerStore()
 
   return (
     <>
@@ -94,6 +96,14 @@ export default function Header() {
                 aria-label="Search products"
               >
                 <Search className="w-5 h-5" aria-hidden />
+              </Link>
+
+              <Link
+                to={isLoggedIn() ? (isAdmin() ? '/admin/dashboard' : '/account') : '/login'}
+                className="btn-ghost p-2 rounded-full"
+                aria-label={isLoggedIn() ? 'My account' : 'Sign in'}
+              >
+                <User className="w-5 h-5" aria-hidden />
               </Link>
 
               <button

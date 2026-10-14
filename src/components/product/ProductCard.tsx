@@ -1,9 +1,11 @@
-import { Link } from 'react-router-dom'
-import { ShoppingBag } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { ShoppingBag, Heart } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Product } from '@/types'
-import { imageUrl } from '@/lib/api'
+import { imageUrl, customerGetWishlist, customerAddToWishlist, customerRemoveFromWishlist } from '@/lib/api'
 import { formatPrice } from '@/lib/cart'
 import { cn } from '@/lib/utils'
+import { useCustomerStore } from '@/lib/customerStore'
 
 interface Props {
   product: Product
@@ -12,6 +14,31 @@ interface Props {
 }
 
 export default function ProductCard({ product, className, priority }: Props) {
+  const { isLoggedIn } = useCustomerStore()
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  const { data: wishlist = [] } = useQuery({
+    queryKey: ['customer-wishlist'],
+    queryFn: customerGetWishlist,
+    enabled: isLoggedIn(),
+  })
+
+  const wishlisted = wishlist.some((w) => w.product_id === product.id)
+
+  const wishlistMutation = useMutation({
+    mutationFn: () =>
+      wishlisted
+        ? customerRemoveFromWishlist(product.id)
+        : customerAddToWishlist(product.id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['customer-wishlist'] }),
+  })
+
+  function handleWishlist(e: React.MouseEvent) {
+    e.preventDefault()
+    if (!isLoggedIn()) { navigate('/login'); return }
+    wishlistMutation.mutate()
+  }
   const img = product.primary_image
     ? imageUrl(product.primary_image)
     : product.images?.[0]?.r2_key
@@ -42,6 +69,19 @@ export default function ProductCard({ product, className, priority }: Props) {
               Sale
             </span>
           )}
+
+          {/* Wishlist button */}
+          <button
+            type="button"
+            onClick={handleWishlist}
+            aria-label={wishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
+            className="absolute top-2 right-2 z-10 p-1.5 bg-white/90 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <Heart
+              className={`w-4 h-4 transition-colors ${wishlisted ? 'text-red-500 fill-red-500' : 'text-gray-500'}`}
+              aria-hidden
+            />
+          </button>
 
           {product.stock === 0 && (
             <div className="absolute inset-0 bg-charcoal-900/40 flex items-center justify-center rounded-lg">

@@ -137,6 +137,47 @@ export interface CreateOrderResponse {
   razorpay_key_id: string | null
 }
 
+// ── Customer accounts ─────────────────────────────────────────────────────────
+
+export interface Customer {
+  id: number
+  name: string
+  email: string
+  phone: string | null
+  created_at: string
+}
+
+export interface CustomerAddress {
+  id: number
+  customer_id: number
+  label: string
+  line1: string
+  line2: string
+  city: string
+  state: string
+  pin: string
+  country: string
+  is_default: number
+  created_at: string
+}
+
+export interface WishlistItem {
+  id: number
+  product_id: number
+  name: string
+  slug: string
+  price: number
+  sale_price: number | null
+  status: string
+}
+
+export interface AuthResponse {
+  role: 'admin' | 'customer'
+  name?: string | undefined
+  email?: string | undefined
+  authenticated?: boolean | undefined
+}
+
 // ── Razorpay global ───────────────────────────────────────────────────────────
 
 export interface RazorpayOptions {

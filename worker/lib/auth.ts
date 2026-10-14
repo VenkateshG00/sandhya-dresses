@@ -30,6 +30,10 @@ export async function hashPassword(password: string): Promise<string> {
   return sha256Hex(password)
 }
 
+export async function hashToken(value: string): Promise<string> {
+  return sha256Hex(value)
+}
+
 function randomToken(): string {
   const bytes = new Uint8Array(32)
   crypto.getRandomValues(bytes)

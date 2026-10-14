@@ -7,6 +7,8 @@ import { orders } from './routes/orders'
 import { webhooks } from './routes/webhooks'
 import { admin } from './routes/admin'
 import { config } from './routes/config'
+import { auth } from './routes/auth'
+import { customer } from './routes/customer'
 
 const api = new Hono<{ Bindings: Env }>()
 
@@ -33,6 +35,8 @@ api.route('/api/orders', orders)
 api.route('/api/webhooks', webhooks)
 api.route('/api/admin', admin)
 api.route('/api/config', config)
+api.route('/api/auth', auth)
+api.route('/api/customer', customer)
 
 api.get('/api/health', (c) =>
   c.json({ ok: true, env: c.env.ENVIRONMENT }),

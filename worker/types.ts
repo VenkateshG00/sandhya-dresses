@@ -1,6 +1,6 @@
 export interface Env {
   DB: D1Database
-  IMAGES: R2Bucket
+  IMAGES?: R2Bucket
   ASSETS: Fetcher
   RAZORPAY_KEY_ID: string
   RAZORPAY_KEY_SECRET: string
@@ -79,6 +79,45 @@ export interface AdminSessionRow {
   token_hash: string
   created_at: string
   expires_at: string
+}
+
+export interface CustomerRow {
+  id: number
+  name: string
+  email: string
+  password_hash: string
+  phone: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface CustomerSessionRow {
+  id: number
+  customer_id: number
+  token_hash: string
+  expires_at: string
+  created_at: string
+}
+
+export interface CustomerAddressRow {
+  id: number
+  customer_id: number
+  label: string
+  line1: string
+  line2: string
+  city: string
+  state: string
+  pin: string
+  country: string
+  is_default: number
+  created_at: string
+}
+
+export interface WishlistRow {
+  id: number
+  customer_id: number
+  product_id: number
+  created_at: string
 }
 
 // ── API request/response shapes ───────────────────────────────────────────────

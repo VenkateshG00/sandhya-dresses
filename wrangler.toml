@@ -1,22 +1,21 @@
-name = "sandhya-dresses"
+name = "store"
 main = "worker/index.ts"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
 # Static assets served from the Vite build output
-assets = { directory = "./dist", not_found_handling = "single-page-application" }
+assets = { directory = "./dist", binding = "ASSETS", not_found_handling = "single-page-application" }
 
 [[d1_databases]]
 binding = "DB"
 database_name = "sandhya-dresses-db"
-# Replace with your actual database_id after running: npm run db:create
-database_id = "REPLACE_AFTER_RUNNING_DB_CREATE"
+database_id = "f9150dda-3076-4b93-908b-d1365cf84768"
 migrations_dir = "migrations"
 
-[[r2_buckets]]
-binding = "IMAGES"
-bucket_name = "sandhya-dresses-images"
-# Run: npm run r2:create to create this bucket
+# [[r2_buckets]]
+# binding = "IMAGES"
+# bucket_name = "sandhya-dresses-images"
+# Uncomment after: enabling R2 in Cloudflare dashboard + npx wrangler r2 bucket create sandhya-dresses-images
 
 # Secrets — set via: wrangler secret put SECRET_NAME
 # RAZORPAY_KEY_ID
@@ -26,7 +25,7 @@ bucket_name = "sandhya-dresses-images"
 
 [vars]
 ENVIRONMENT = "production"
-SITE_URL = "https://sandhyadresses.in"
+SITE_URL = "https://store.sandhyadresses.workers.dev"
 
 [env.preview]
 name = "sandhya-dresses-preview"
@@ -35,9 +34,9 @@ vars = { ENVIRONMENT = "preview", SITE_URL = "https://sandhya-dresses-preview.wo
 [[env.preview.d1_databases]]
 binding = "DB"
 database_name = "sandhya-dresses-db"
-database_id = "REPLACE_AFTER_RUNNING_DB_CREATE"
+database_id = "f9150dda-3076-4b93-908b-d1365cf84768"
 migrations_dir = "migrations"
 
-[[env.preview.r2_buckets]]
-binding = "IMAGES"
-bucket_name = "sandhya-dresses-images-preview"
+# [[env.preview.r2_buckets]]
+# binding = "IMAGES"
+# bucket_name = "sandhya-dresses-images-preview"
