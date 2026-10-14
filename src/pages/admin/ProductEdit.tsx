@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Upload, Trash2, GripVertical } from 'lucide-react'
 import {
-  adminFetchProducts,
+  adminFetchProduct,
   adminCreateProduct,
   adminUpdateProduct,
   adminUploadImage,
@@ -55,9 +55,9 @@ export default function ProductEdit() {
     queryFn: fetchCategories,
   })
 
-  const { data: productsData, isLoading } = useQuery({
+  const { data: productData, isLoading } = useQuery({
     queryKey: ['admin-product-detail', id],
-    queryFn: () => adminFetchProducts({ limit: 1, page: 1 }).then((r) => r),
+    queryFn: () => adminFetchProduct(Number(id)),
     enabled: !isNew,
   })
 
@@ -75,28 +75,26 @@ export default function ProductEdit() {
   })
 
   useEffect(() => {
-    if (!isNew && productsData?.products.length) {
-      const p = productsData.products.find((x) => x.id === Number(id))
-      if (p) {
-        setForm({
-          name: p.name ?? '',
-          slug: p.slug ?? '',
-          description: p.description ?? '',
-          price: p.price != null ? String(p.price / 100) : '',
-          sale_price: p.sale_price != null ? String(p.sale_price / 100) : '',
-          sku: p.sku ?? '',
-          stock: String(p.stock ?? 0),
-          sizes: Array.isArray(p.sizes) ? p.sizes.join(', ') : '',
-          colors: Array.isArray(p.colors) ? p.colors.join(', ') : '',
-          care_instructions: p.care_instructions ?? '',
-          status: p.status ?? 'draft',
-          category_id: p.category_id != null ? String(p.category_id) : '',
-        })
-        setImages(Array.isArray(p.images) ? (p.images as ProductImage[]).map((i) => ({ ...i })) : [])
-        setSlugManual(true)
-      }
+    if (!isNew && productData) {
+      const p = productData
+      setForm({
+        name: p.name ?? '',
+        slug: p.slug ?? '',
+        description: p.description ?? '',
+        price: p.price != null ? String(p.price / 100) : '',
+        sale_price: p.sale_price != null ? String(p.sale_price / 100) : '',
+        sku: p.sku ?? '',
+        stock: String(p.stock ?? 0),
+        sizes: Array.isArray(p.sizes) ? p.sizes.join(', ') : '',
+        colors: Array.isArray(p.colors) ? p.colors.join(', ') : '',
+        care_instructions: p.care_instructions ?? '',
+        status: p.status ?? 'draft',
+        category_id: p.category_id != null ? String(p.category_id) : '',
+      })
+      setImages(Array.isArray(p.images) ? (p.images as ProductImage[]).map((i) => ({ ...i })) : [])
+      setSlugManual(true)
     }
-  }, [isNew, productsData, id])
+  }, [isNew, productData])
 
   function set(key: keyof ProductFormData, value: string) {
     setForm((prev) => {

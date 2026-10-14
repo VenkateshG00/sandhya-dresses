@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import type { Env } from '../types'
 import { listProducts, getProductWithImages, getCategories } from '../lib/db'
-import { getImage } from '../lib/r2'
+// import { getImage } from '../lib/r2'  // R2 — uncomment when R2 is enabled
 
 const products = new Hono<{ Bindings: Env }>()
 
@@ -59,15 +59,14 @@ products.get('/:slug', async (c) => {
   }
 })
 
-// R2 image proxy — served with long cache headers
+// R2 image proxy — uncomment when R2 is enabled
+// const images = new Hono<{ Bindings: Env }>()
+// images.get('/*', async (c) => {
+//   const key = c.req.path.replace('/api/images/', '')
+//   if (!key || key.includes('..')) return c.json({ error: 'Invalid image path' }, 400)
+//   return getImage(c.env.IMAGES!, key)
+// })
 const images = new Hono<{ Bindings: Env }>()
-
-images.get('/*', async (c) => {
-  const key = c.req.path.replace('/api/images/', '')
-  if (!key || key.includes('..')) {
-    return c.json({ error: 'Invalid image path' }, 400)
-  }
-  return getImage(c.env.IMAGES, key)
-})
+images.get('/*', (c) => c.json({ error: 'Image storage not configured' }, 503))
 
 export { products, images }

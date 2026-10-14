@@ -1,6 +1,6 @@
 export interface Env {
   DB: D1Database
-  IMAGES?: R2Bucket
+  // IMAGES?: R2Bucket  // R2 — uncomment when R2 is enabled
   ASSETS: Fetcher
   RAZORPAY_KEY_ID: string
   RAZORPAY_KEY_SECRET: string
@@ -8,6 +8,9 @@ export interface Env {
   SESSION_SECRET: string
   ENVIRONMENT: string
   SITE_URL: string
+  CLOUDINARY_CLOUD_NAME: string
+  CLOUDINARY_API_KEY: string
+  CLOUDINARY_API_SECRET: string
 }
 
 // ── DB row shapes ─────────────────────────────────────────────────────────────

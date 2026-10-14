@@ -174,6 +174,11 @@ export async function adminFetchDashboard() {
   }>('/admin/dashboard')
 }
 
+export async function adminFetchProduct(id: number): Promise<Product> {
+  const res = await request<{ product: Record<string, unknown> }>(`/admin/products/${id}`)
+  return normalizeProduct(res.product)
+}
+
 export async function adminFetchProducts(params: ProductFilters & { status?: string } = {}) {
   const qs = buildProductQueryString(params)
   const res = await request<{ products: Record<string, unknown>[]; pagination: ProductsResponse['pagination'] }>(

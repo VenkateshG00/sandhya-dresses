@@ -10,7 +10,8 @@ import {
   setSessionCookie,
   clearSessionCookie,
 } from '../lib/auth'
-import { uploadImage, deleteImage } from '../lib/r2'
+// import { uploadImage, deleteImage } from '../lib/r2'  // R2 — uncomment when R2 is enabled
+import { uploadImage, deleteImage } from '../lib/cloudinary'
 import { listProducts, getAllConfig, setConfig } from '../lib/db'
 
 const admin = new Hono<{ Bindings: Env }>()
@@ -185,6 +186,28 @@ admin.post('/products', async (c) => {
   }
 })
 
+admin.get('/products/:id', async (c) => {
+  const id = Number(c.req.param('id'))
+  const product = await c.env.DB.prepare(
+    `SELECT p.*, c.name AS category_name, c.slug AS category_slug
+     FROM products p LEFT JOIN categories c ON c.id = p.category_id
+     WHERE p.id = ? LIMIT 1`,
+  ).bind(id).first<Record<string, unknown>>()
+  if (!product) return c.json({ error: 'Not found' }, 404)
+
+  const images = await c.env.DB.prepare(
+    `SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order ASC`,
+  ).bind(id).all()
+
+  const parsed = {
+    ...product,
+    sizes: typeof product.sizes === 'string' ? JSON.parse(product.sizes) : product.sizes,
+    colors: typeof product.colors === 'string' ? JSON.parse(product.colors) : product.colors,
+    images: images.results,
+  }
+  return c.json({ product: parsed })
+})
+
 admin.put('/products/:id', async (c) => {
   const id = parseInt(c.req.param('id'))
   if (isNaN(id)) return c.json({ error: 'Invalid product id' }, 400)
@@ -242,7 +265,10 @@ admin.delete('/products/:id', async (c) => {
     .bind(id)
     .all<{ r2_key: string }>()
 
-  await Promise.all(images.results.map((img) => deleteImage(c.env.IMAGES, img.r2_key)))
+  // R2: await Promise.all(images.results.map((img) => deleteImage(c.env.IMAGES, img.r2_key)))
+  await Promise.all(images.results.map((img) => deleteImage(
+    c.env.CLOUDINARY_CLOUD_NAME, c.env.CLOUDINARY_API_KEY, c.env.CLOUDINARY_API_SECRET, img.r2_key,
+  )))
 
   await c.env.DB.prepare(`DELETE FROM products WHERE id = ?`).bind(id).run()
   return c.json({ ok: true })
@@ -341,7 +367,9 @@ admin.post('/images/upload', async (c) => {
 
   try {
     const { key, url } = await uploadImage(
-      c.env.IMAGES,
+      c.env.CLOUDINARY_CLOUD_NAME,
+      c.env.CLOUDINARY_API_KEY,
+      c.env.CLOUDINARY_API_SECRET,
       file,
       folder as 'products' | 'config',
     )
@@ -371,7 +399,8 @@ admin.delete('/images/:key{.+}', async (c) => {
   const key = c.req.param('key')
   if (!key || key.includes('..')) return c.json({ error: 'Invalid key' }, 400)
 
-  await deleteImage(c.env.IMAGES, key)
+  // R2: await deleteImage(c.env.IMAGES, key)
+  await deleteImage(c.env.CLOUDINARY_CLOUD_NAME, c.env.CLOUDINARY_API_KEY, c.env.CLOUDINARY_API_SECRET, key)
   await c.env.DB.prepare(`DELETE FROM product_images WHERE r2_key = ?`).bind(key).run()
 
   return c.json({ ok: true })
