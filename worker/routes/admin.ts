@@ -380,11 +380,12 @@ admin.post('/images/upload', async (c) => {
         const alt = formData.get('alt')?.toString() ?? file.name
         const sortOrder = parseInt(formData.get('sort_order')?.toString() ?? '0') || 0
 
-        await c.env.DB.prepare(
+        const imgResult = await c.env.DB.prepare(
           `INSERT INTO product_images (product_id, r2_key, alt, sort_order) VALUES (?,?,?,?)`,
         )
           .bind(pid, key, alt, sortOrder)
           .run()
+        return c.json({ key, url, id: imgResult.meta.last_row_id }, 201)
       }
     }
 
@@ -395,14 +396,21 @@ admin.post('/images/upload', async (c) => {
   }
 })
 
-admin.delete('/images/:key{.+}', async (c) => {
-  const key = c.req.param('key')
-  if (!key || key.includes('..')) return c.json({ error: 'Invalid key' }, 400)
+admin.delete('/images/:id', async (c) => {
+  const id = Number(c.req.param('id'))
+  if (!id) return c.json({ error: 'Invalid id' }, 400)
 
-  // R2: await deleteImage(c.env.IMAGES, key)
-  await deleteImage(c.env.CLOUDINARY_CLOUD_NAME, c.env.CLOUDINARY_API_KEY, c.env.CLOUDINARY_API_SECRET, key)
-  await c.env.DB.prepare(`DELETE FROM product_images WHERE r2_key = ?`).bind(key).run()
+  const row = await c.env.DB.prepare(
+    `SELECT r2_key FROM product_images WHERE id = ?`,
+  ).bind(id).first<{ r2_key: string }>()
 
+  if (row?.r2_key) {
+    await deleteImage(
+      c.env.CLOUDINARY_CLOUD_NAME, c.env.CLOUDINARY_API_KEY, c.env.CLOUDINARY_API_SECRET, row.r2_key,
+    ).catch(() => {}) // don't fail if Cloudinary delete errors
+  }
+
+  await c.env.DB.prepare(`DELETE FROM product_images WHERE id = ?`).bind(id).run()
   return c.json({ ok: true })
 })
 

@@ -7,6 +7,7 @@ import {
   adminCreateProduct,
   adminUpdateProduct,
   adminUploadImage,
+  adminDeleteProductImage,
   imageUrl,
 } from '@/lib/api'
 import { fetchCategories } from '@/lib/api'
@@ -177,7 +178,7 @@ export default function ProductEdit() {
         setImages((prev) =>
           prev.map((img) =>
             img.id === tempId
-              ? { ...img, r2_key: res.key, uploading: false }
+              ? { ...img, id: (res as { key: string; url: string; id?: number }).id ?? tempId, r2_key: res.key, uploading: false }
               : img,
           ),
         )
@@ -190,7 +191,16 @@ export default function ProductEdit() {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  function removeImage(imgId: number | string) {
+  async function removeImage(imgId: number | string) {
+    // Only call API for real DB images (numeric ids that aren't temp floats)
+    if (typeof imgId === 'number' && Number.isInteger(imgId) && imgId > 0) {
+      try {
+        await adminDeleteProductImage(imgId)
+      } catch (err) {
+        alert(`Failed to remove image: ${(err as Error).message}`)
+        return
+      }
+    }
     setImages((prev) => prev.filter((img) => img.id !== imgId))
   }
 
@@ -372,7 +382,7 @@ export default function ProductEdit() {
                   {!img.uploading && (
                     <button
                       type="button"
-                      onClick={() => removeImage(img.id)}
+                      onClick={() => void removeImage(img.id)}
                       className="p-1 text-charcoal-300 hover:text-red-500 transition-colors"
                       aria-label="Remove image"
                     >

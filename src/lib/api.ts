@@ -207,6 +207,12 @@ export async function adminDeleteProduct(id: number) {
   })
 }
 
+export async function adminDeleteProductImage(imageId: number) {
+  return request<{ ok: boolean }>(`/admin/images/${imageId}`, {
+    method: 'DELETE',
+  })
+}
+
 export async function adminFetchOrders(params: {
   page?: number
   payment_status?: string
