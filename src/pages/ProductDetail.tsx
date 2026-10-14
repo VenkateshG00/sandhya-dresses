@@ -23,6 +23,7 @@ export default function ProductDetail() {
   const [added, setAdded] = useState(false)
 
   const addItem = useCartStore((s) => s.addItem)
+  const clearCart = useCartStore((s) => s.clearCart)
   const { isLoggedIn } = useCustomerStore()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -91,7 +92,25 @@ export default function ProductDetail() {
   }
 
   function handleBuyNow() {
-    if (addToCart()) navigate('/checkout')
+    if (!product) return
+    if (product.sizes.length > 0 && !selectedSize) {
+      alert('Please select a size')
+      return
+    }
+    clearCart()
+    addItem(
+      {
+        id: product.id,
+        slug: product.slug,
+        name: product.name,
+        price: product.price,
+        sale_price: product.sale_price,
+        stock: product.stock,
+        primary_image: product.images?.[0]?.r2_key,
+      },
+      { size: selectedSize, color: selectedColor, quantity },
+    )
+    navigate('/checkout')
   }
 
   async function handleShare() {
