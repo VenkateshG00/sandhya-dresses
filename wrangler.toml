@@ -1,0 +1,43 @@
+name = "sandhya-dresses"
+main = "worker/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Static assets served from the Vite build output
+assets = { directory = "./dist", not_found_handling = "single-page-application" }
+
+[[d1_databases]]
+binding = "DB"
+database_name = "sandhya-dresses-db"
+# Replace with your actual database_id after running: npm run db:create
+database_id = "REPLACE_AFTER_RUNNING_DB_CREATE"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "sandhya-dresses-images"
+# Run: npm run r2:create to create this bucket
+
+# Secrets — set via: wrangler secret put SECRET_NAME
+# RAZORPAY_KEY_ID
+# RAZORPAY_KEY_SECRET
+# ADMIN_PASSWORD_HASH     (bcrypt hash of your chosen admin password)
+# SESSION_SECRET          (random 64-char string for signing session tokens)
+
+[vars]
+ENVIRONMENT = "production"
+SITE_URL = "https://sandhyadresses.in"
+
+[env.preview]
+name = "sandhya-dresses-preview"
+vars = { ENVIRONMENT = "preview", SITE_URL = "https://sandhya-dresses-preview.workers.dev" }
+
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "sandhya-dresses-db"
+database_id = "REPLACE_AFTER_RUNNING_DB_CREATE"
+migrations_dir = "migrations"
+
+[[env.preview.r2_buckets]]
+binding = "IMAGES"
+bucket_name = "sandhya-dresses-images-preview"

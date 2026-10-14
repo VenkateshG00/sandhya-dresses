@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-bg: theme('colors.ivory.50');
+    --color-surface: theme('colors.ivory.100');
+    --color-text: theme('colors.charcoal.800');
+    --color-text-muted: theme('colors.charcoal.500');
+    --color-accent: theme('colors.burgundy.500');
+    --color-accent-dark: theme('colors.burgundy.600');
+    --color-gold: theme('colors.gold.500');
+    --color-border: theme('colors.sand');
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-ivory-50 text-charcoal-800 font-sans antialiased;
+    min-height: 100dvh;
+  }
+
+  *:focus-visible {
+    @apply outline-none ring-2 ring-burgundy-500 ring-offset-2 ring-offset-ivory-50;
+  }
+
+  ::selection {
+    @apply bg-burgundy-100 text-burgundy-900;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif text-charcoal-900;
+  }
+
+  img {
+    @apply max-w-full;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-burgundy-500 text-ivory-50 font-medium text-sm tracking-wide rounded transition-colors duration-150 hover:bg-burgundy-600 active:bg-burgundy-700 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-burgundy-500 focus-visible:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-transparent border border-burgundy-500 text-burgundy-500 font-medium text-sm tracking-wide rounded transition-colors duration-150 hover:bg-burgundy-50 active:bg-burgundy-100 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 bg-transparent text-charcoal-700 font-medium text-sm rounded transition-colors duration-150 hover:bg-charcoal-50 active:bg-charcoal-100;
+  }
+
+  .input-base {
+    @apply w-full px-4 py-3 bg-white border border-sand rounded text-charcoal-800 placeholder:text-charcoal-400 text-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-burgundy-500 focus:border-transparent;
+  }
+
+  .label-base {
+    @apply block text-sm font-medium text-charcoal-700 mb-1.5;
+  }
+
+  .card {
+    @apply bg-white border border-sand rounded-lg shadow-card;
+  }
+
+  .page-container {
+    @apply max-w-8xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section {
+    @apply py-16 lg:py-24;
+  }
+
+  .section-title {
+    @apply font-serif text-display-sm text-charcoal-900 mb-4;
+  }
+
+  .prose-fashion {
+    @apply text-charcoal-700 leading-relaxed;
+  }
+
+  .tag {
+    @apply inline-flex items-center px-3 py-1 text-xs font-medium rounded-full;
+  }
+
+  .tag-burgundy {
+    @apply tag bg-burgundy-100 text-burgundy-700;
+  }
+
+  .tag-gold {
+    @apply tag bg-gold-100 text-gold-700;
+  }
+
+  .badge-sale {
+    @apply absolute top-2 left-2 px-2 py-0.5 text-xs font-semibold bg-burgundy-500 text-white rounded z-10;
+  }
+
+  .divider {
+    @apply border-t border-sand;
+  }
+
+  .skeleton {
+    @apply animate-pulse bg-ivory-200 rounded;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .aspect-product {
+    aspect-ratio: 3 / 4;
+  }
+
+  .aspect-hero {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print */
+@media print {
+  .no-print { display: none !important; }
+}
