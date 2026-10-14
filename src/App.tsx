@@ -134,7 +134,7 @@ export default function App() {
             }
           />
           <Route
-            path="/order/:orderNumber"
+            path="/order-confirmation/:orderNumber"
             element={
               <StoreLayout>
                 <OrderConfirmation />
